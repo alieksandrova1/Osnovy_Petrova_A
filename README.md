@@ -1,0 +1,1 @@
+# Osnovy_Petrova_A_laba1
