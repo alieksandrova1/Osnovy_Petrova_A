@@ -1,0 +1,63 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+int main() {
+
+    FILE *file;
+    file = fopen("text.txt", "r");
+    char buff[255];
+    char *pr;
+    int max = -1;
+    int maxIndex = -1;
+    int line = 0;
+
+    while(1) {
+        pr = fgets(buff, 255, file);
+        if (pr == NULL) {
+            break;
+        }
+        int i = 0;
+        char curr[255] = "";
+        int k = 0;
+        while (buff[i] != '\0') {
+            if ((buff[i] >= '0') && (buff[i] <= '9')) {
+                curr[k] = buff[i];
+                k++;
+            } else {
+                if (k != 0) {
+                    curr[k] = '\0';
+                    int nn = atoi(curr);
+                    if (nn > max) {
+                        max = nn;
+                        maxIndex = line;
+                    }
+                }
+                k = 0;
+            }
+            i++;
+        }
+        line++;
+    }
+    fclose(file);
+    file = fopen("text.txt", "r");
+    FILE *out;
+    out = fopen("out.txt", "w");
+    line = 0;
+    while (1) {
+        pr = fgets(buff, 255, file);
+        if (pr == NULL) {
+            break;
+        }
+
+        if (line == maxIndex) {
+            line++;
+            continue;
+        }
+        line++;
+        fputs(buff, out);
+
+    }
+    fclose(file);
+    fclose(out);
+    return 0;
+}
