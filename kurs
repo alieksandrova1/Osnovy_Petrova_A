@@ -1,0 +1,147 @@
+#include <stdio.h>
+
+int strlen(const char * arr){
+    int len = 0;
+	for(len = 0; arr[len] != 0; ++len);
+	return len;
+}
+
+int getline(FILE* in, char *buffer){
+	char c;
+	int i = 0;
+	buffer[i] = 0;
+	while ((c = fgetc(in)) != EOF && c != '\n'){
+		 buffer[i] = c;
+		 ++i;
+	}
+	buffer[i] = 0;
+	if (c == EOF){
+	  return 0;
+	}
+	return 1;
+}
+
+int strequal(const char* a, const char *b){
+    if(strlen(a) != strlen(b)){
+		return 0;
+	}
+	else{
+	   int i;
+	   for(i = 0; a[i] != 0 && b[i] != 0; ++i){
+		 if(a[i] != b[i]){
+			return 0;
+		 }
+	   }
+	}
+	return 1;
+}
+
+//‰ÂÙ‡ÈÌ˚
+typedef struct{
+	char file_name[32];//ËÏÂÌ‡ Ù‡ÈÎÓ‚
+	char define_name[32];//‡ÎË‡Ò ‰ÂÙ‡ÈÌ‡
+	char value[32];//ÁÌ‡˜ÂÌËÂ ‡ÎË‡Ò‡
+}Define;
+
+
+//ÍÓÔËÛÂÏ
+void strcpy(char *a, const char *b){
+	int i;
+	for(i = 0; b[i] != 0; ++i){
+		a[i] = b[i];
+	}
+	a[i] = 0;
+}
+
+int find(Define* defines, int *cnt, const char* val){
+	for(int i = 0; i < *cnt; ++i){
+	   if(strequal(defines[i].define_name, val)){
+			return i;
+	   }
+	}
+	return -1;
+}
+
+//Ô‡ÒÂ ÒÚÓÍË
+void parceLine(Define* defines, int *cnt, FILE* result, const char* fname, const char* buffer){
+		 FILE* ss = fopen("tmp","w");
+		 fprintf(ss, "%s", buffer);
+		 fclose(ss);
+		 ss = fopen("tmp","r");
+		 char word[32];//Í‡‰ÊÓÂ ÒÎÓ‚Ó ÍÓ‰‡
+		 while(!feof(ss) && fscanf(ss, "%s",word) == 1){
+			 if(strequal(word,"#define")){
+				 fprintf(result, "%s ", word);
+				 strcpy(defines[*cnt].file_name, fname);
+				 fscanf(ss, "%s",defines[*cnt].define_name);
+				 fprintf(result, "%s ", defines[*cnt].define_name);
+				 getline(ss, defines[*cnt].value);
+				 fprintf(result, "%s ", defines[*cnt].value);
+				 (*cnt)++;
+				 break;
+			 }
+			 else{	//ÂÒÎË ÌÂ Ï‡ÍÓÒ, ÚÓ ÔÓ‚ÂˇÂÏ ÒÎÓ‚‡
+				int res = find(defines, cnt, word); 
+				if(res != -1){
+					fprintf(result, "%s ", defines[res].value);
+				}
+				else{
+				   fprintf(result, "%s ", word);
+				}
+			 }
+		 }
+		 fclose(ss);
+}
+
+//ÍÓÔËÛÂÏ ËÁ ‡ ‚ b
+void copyFiles(const char *a, const char *b){
+	FILE *aa = fopen(a, "r");
+	FILE *bb = fopen(b, "w");
+	char ch;
+	while ((ch = fgetc(aa)) != EOF)
+      fputc(ch, bb);
+	fclose(aa);
+	fclose(bb);
+}
+//Ò˜ËÚ˚‚‡ÂÏ ËÁ Ù‡ÈÎ‡
+void readFromFile(Define* defines, int *cnt, const char* fname){
+	 FILE* in = fopen(fname, "r");
+	 char buffer[128];//·ÛÙÂ ‰Îˇ Ò˜ËÚ˚‚‡ÌËˇ
+	 FILE* result = fopen("rtmp", "w");//ÂÁÛÎ¸ÚËÛ˛˘ËÈ ·ÛÙÙÂ
+	 while(getline(in, buffer)){
+		 if(buffer[0] != 0){
+			 parceLine(defines, cnt, result, fname, buffer);
+			 fprintf(result, "\n");
+		 }
+	 }
+	 //Á‡ÔËÒ˚‚‡ÂÏ Ó·‡·ÓÚ‡ÌÌ˚È Ù‡ÈÎ Ó·‡ÚÌÓ
+	 fclose(in);
+	 fclose(result);
+	 copyFiles("rtmp", fname);
+	 
+}
+
+int main(){
+  int files_cnt;//ÍÓÎË˜ÂÒÚ‚Ó Ù‡ÈÎÓ‚
+  printf("Files: "); 
+  scanf("%d",&files_cnt);
+  //ËÏÂÌ‡ Ù‡ÈÎÓ‚
+  char file_names[10][32];//ÌÂ ÏÓÊÂÚ ·˚Ú¸ ·ÓÎ¸¯Â 10 Ù‡ÈÎÓ‚ 
+  printf("Enter %d file names:\n", files_cnt);
+  for(int i = 0; i < files_cnt; ++i){
+	 scanf("%s", file_names[i]);
+  }
+  //‚ÒÂ ‰ÂÙ‡ÈÌ˚
+  Define defines[20];//ÌÂ ÏÓÊÂÚ ·˚Ú¸ ·ÓÎ¸¯Â 20 ‰ÂÙ‡ÈÌÓ‚
+  int defines_cnt = 0;//ÍÓÎË˜ÂÒÚ‚Ó ‰ÂÙ‡ÈÌÓ‚
+  
+  for(unsigned i = 0; i < files_cnt; ++i){
+	  readFromFile(defines, &defines_cnt, file_names[i]);
+	 
+  }
+  //‚˚‚Ó‰ËÏ ·‡ÁÛ ‚ Ù‡ÈÎ
+  FILE *ff = fopen("data.bin", "wb");
+  fwrite(defines, sizeof(Define), defines_cnt, ff);
+  fclose(ff);
+
+}
