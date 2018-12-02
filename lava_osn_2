@@ -7,7 +7,7 @@ int main() {
     file = fopen("text.txt", "r");
     char buff[255];
     char *pr;
-    int max = -1;
+    int max = -99999;
     int maxIndex = -1;
     int line = 0;
 
@@ -20,7 +20,7 @@ int main() {
         char curr[255] = "";
         int k = 0;
         while (buff[i] != '\0') {
-            if ((buff[i] >= '0') && (buff[i] <= '9')) {
+            if (((buff[i] >= '0') && (buff[i] <= '9'))|| buff[i] == '-') {
                 curr[k] = buff[i];
                 k++;
             } else {
