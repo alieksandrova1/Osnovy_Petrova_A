@@ -1,11 +1,5 @@
 #include <stdio.h>
 
-int sstrlen(const char * arr){
-    int len = 0;
-    for(len = 0; arr[len] != 0; ++len);
-    return len;
-}
-
 int ggetline(FILE* in, char *buffer){
     char c;
     int i = 0;
@@ -24,16 +18,15 @@ int ggetline(FILE* in, char *buffer){
 int main(){
     FILE* in;
     in = fopen("input.txt", "r");
-    char line[64];
-    char *ln = line;
-    while(ggetline(in, ln)){
-        for(int i = 0; i < sstrlen(ln) / 2; ++i){
-            char tmp = ln[i];
-            ln[i] = ln[strlen(ln) - 1 - i];
-            ln[strlen(ln) - 1 - i] = tmp;
-        }
-        printf("%s\n", line);
+    char line[10][64];
+    int size = 0;
+    while(ggetline(in, line[size])){
+        ++size;
+    }
+    --size;
+    while(size >= 0){
+        printf("%s\n", line[size]);
+        --size;
     }
     fclose(in);
 }
-
